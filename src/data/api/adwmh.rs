@@ -1,5 +1,7 @@
 use crate::data::api::client::AHUClient;
+#[cfg(not(target_vendor = "apple"))]
 use anyhow::anyhow;
+#[cfg(not(target_vendor = "apple"))]
 use reqwest::multipart;
 use serde_json::Value;
 
@@ -7,6 +9,7 @@ const BASE_URL: &str = "https://adwmh.ahu.edu.cn";
 
 impl AHUClient {
     // @GET("/remind/authcode")
+    #[cfg(not(target_vendor = "apple"))]
     pub async fn get_auth_code(&self) -> anyhow::Result<bytes::Bytes> {
         let response = self
             .http
@@ -33,6 +36,7 @@ impl AHUClient {
     }
 
     // @POST("/user/login")
+    #[cfg(not(target_vendor = "apple"))]
     pub async fn login_with_captcha(
         &self,
         username: &str,
@@ -68,6 +72,7 @@ impl AHUClient {
             .await
     }
 
+    #[cfg(not(target_vendor = "apple"))]
     pub async fn get_captcha_result(
         &self,
         url: &str,

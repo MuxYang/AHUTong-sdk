@@ -1,5 +1,8 @@
 use crate::data::api::client::AHUClient;
-use crate::data::model::{Course, Exam, User};
+#[cfg(not(target_vendor = "apple"))]
+use crate::data::model::User;
+use crate::data::model::{Course, Exam};
+#[cfg(not(target_vendor = "apple"))]
 use crate::utils::des::DES;
 use crate::utils::parser::Parser;
 use anyhow::{Context, Result, anyhow};
@@ -7,6 +10,7 @@ use log::{debug, error, info, warn};
 use serde::Serialize;
 use serde_json::Value;
 
+#[cfg(not(target_vendor = "apple"))]
 const JWXT_HOME: &str = "https://jw.ahu.edu.cn/student/home";
 
 pub struct Crawler {
@@ -27,6 +31,7 @@ impl Crawler {
         Self { client }
     }
 
+    #[cfg(not(target_vendor = "apple"))]
     pub async fn login(&self, username: &str, password: &str) -> Result<User> {
         info!("Starting login flow");
         let mut login_success_info: Option<Value> = None;

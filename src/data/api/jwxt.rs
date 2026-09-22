@@ -1,5 +1,6 @@
 use crate::data::api::client::AHUClient;
 use anyhow::Result;
+#[cfg(not(target_vendor = "apple"))]
 use reqwest::Response;
 use serde_json::Value;
 
@@ -7,6 +8,7 @@ const BASE_URL: &str = "https://jw.ahu.edu.cn";
 
 impl AHUClient {
     // @GET("/student/sso/login")
+    #[cfg(not(target_vendor = "apple"))]
     pub async fn fetch_login_info(&self) -> reqwest::Result<(String, reqwest::Url)> {
         let resp = self
             .http
@@ -115,6 +117,7 @@ impl AHUClient {
     }
 
     // @POST device
+    #[cfg(not(target_vendor = "apple"))]
     pub async fn device_login(
         &self,
         url: &str,
@@ -133,6 +136,7 @@ impl AHUClient {
     }
 
     // @POST login
+    #[cfg(not(target_vendor = "apple"))]
     pub async fn jwxt_login(
         &self,
         url: &str,

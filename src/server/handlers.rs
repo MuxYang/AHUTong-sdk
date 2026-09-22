@@ -67,6 +67,7 @@ pub async fn cookies_flat(
     ))
 }
 
+#[cfg(not(target_vendor = "apple"))]
 pub async fn login(
     State(state): State<AppState>,
     headers: HeaderMap,

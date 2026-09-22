@@ -1,17 +1,19 @@
 use axum::{
-    routing::{get, post},
     Router,
+    routing::{get, post},
 };
 
 use super::handlers::{self, AppState};
 
 pub fn router(state: AppState) -> Router {
-    Router::new()
+    let router = Router::new()
         .route("/health", get(handlers::health))
         .route("/init", post(handlers::init))
         .route("/cookies/dump", get(handlers::dump_cookies))
-        .route("/cookies/flat", get(handlers::cookies_flat))
-        .route("/login", post(handlers::login))
+        .route("/cookies/flat", get(handlers::cookies_flat));
+    #[cfg(not(target_vendor = "apple"))]
+    let router = router.route("/login", post(handlers::login));
+    router
         .route("/schedule", get(handlers::schedule))
         .route("/schedule/next", get(handlers::next_schedule))
         .route("/schedule/current-week", get(handlers::current_week))
