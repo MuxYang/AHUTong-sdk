@@ -1,5 +1,6 @@
 use reqwest::{Client, ClientBuilder};
 use std::sync::Arc;
+#[cfg(feature = "domain-campus-card")]
 use tokio::sync::RwLock;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -10,6 +11,7 @@ pub struct AHUClient {
     pub(crate) http: Client,
     #[cfg(not(target_arch = "wasm32"))]
     pub(crate) cookie_store: Arc<CookieStoreMutex>,
+    #[cfg(feature = "domain-campus-card")]
     pub(crate) ycard_token: Arc<RwLock<Option<String>>>,
 }
 
@@ -21,7 +23,7 @@ impl AHUClient {
         #[cfg(not(target_arch = "wasm32"))]
         let http = ClientBuilder::new()
             .connect_timeout(std::time::Duration::from_secs(5))
-            .timeout(std::time::Duration::from_secs(300))
+            .timeout(std::time::Duration::from_secs(if cfg!(all(feature = "domain-campus-card", not(feature = "legacy"))) { 12 } else { 300 }))
             .cookie_provider(cookie_store.clone())
             .redirect(reqwest::redirect::Policy::limited(10))
             .user_agent("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36")
@@ -29,12 +31,15 @@ impl AHUClient {
             .unwrap_or_else(|_| Client::new());
 
         #[cfg(target_arch = "wasm32")]
-        let http = ClientBuilder::new().build().unwrap_or_else(|_| Client::new());
+        let http = ClientBuilder::new()
+            .build()
+            .unwrap_or_else(|_| Client::new());
 
         Self {
             http,
             #[cfg(not(target_arch = "wasm32"))]
             cookie_store,
+            #[cfg(feature = "domain-campus-card")]
             ycard_token: Arc::new(RwLock::new(None)),
         }
     }
@@ -96,7 +101,11 @@ impl AHUClient {
 
                     if let Ok(url) = url::Url::parse(&url_str) {
                         if let Err(e) = store.parse(&cookie_str, &url) {
-                            log::warn!("[RustSDKCookie] Failed to parse cookie '{}': {:?}", name, e);
+                            log::warn!(
+                                "[RustSDKCookie] Failed to parse cookie '{}': {:?}",
+                                name,
+                                e
+                            );
                         }
                     } else {
                         log::warn!("[RustSDKCookie] Invalid URL for cookie domain: {}", url_str);
